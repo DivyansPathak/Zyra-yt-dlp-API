@@ -1,5 +1,3 @@
-Here's an attractive and dynamic `README.md` file generated based on the provided project context:
-
 ---
 
 # 🎵 MelodyStream API: Seamless Music Search & Streaming
