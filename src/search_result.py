@@ -22,9 +22,9 @@ def fetch_youtube_data(query: str) -> List[Dict[str, Any]]:
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             result = ydl.extract_info(search_query, download=False)
-            print("--- Raw Data from yt-dlp ---")
-            print(json.dumps(result, indent=2))
-            print("----------------------------")
+            # print("--- Raw Data from yt-dlp ---")
+            # print(json.dumps(result, indent=2))
+            # print("----------------------------")
             return result.get('entries', [])
     except (DownloadError, Exception) as e:
 
