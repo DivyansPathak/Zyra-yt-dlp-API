@@ -1,11 +1,15 @@
-import pandas as pd
 from fastapi import FastAPI, HTTPException
+from yt_dlp.utils import DownloadError
+
 from typing import List
+
 from schema.ouput_schema import *
+from schema.input_schema import SearchRequest
 from src.search_result import fetch_youtube_data, parse_search_results
 from src.stream_data import fetch_stream_data, parse_stream_url
+from src.ai_recommendation import recommender_function
+from src.batch_search import search_multiple_songs
 
-from yt_dlp.utils import DownloadError
 
 app = FastAPI(
     title="Music Streaming API",
@@ -60,3 +64,33 @@ async def get_stream_url(url: str):
         raise HTTPException(status_code=503, detail="Failed to get stream URL from YouTube.")
     except Exception:
         raise HTTPException(status_code=500, detail="An internal server error occurred while fetching the stream.")
+    
+@app.get("/recommendations")
+def recommend_song(song: str) -> list:
+    
+    try:
+        recommendations = recommender_function(song)
+        if not recommendations:
+            raise HTTPException(status_code=404, detail="Could not find recommendations")
+            
+        return recommendations
+    
+    except Exception:
+        raise HTTPException(status_code=500, detail="An internal server error occurred.")
+
+
+@app.post("/search-songs/", response_model=List[SongSearchResult])
+def search_songs_endpoint(request: SearchRequest):
+    """
+    Accepts a list of song queries and returns a combined list of their metadata from YouTube.
+    """
+    try:
+        # The main logic is called here
+        results = search_multiple_songs(request.queries)
+        return results
+    except Exception as e:
+        # If any error occurs in the yt-dlp process, return a 500 server error
+        raise HTTPException(
+            status_code=500, 
+            detail=f"An internal error occurred: {str(e)}"
+        ) 
