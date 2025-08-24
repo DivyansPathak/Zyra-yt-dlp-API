@@ -3,4 +3,7 @@ uvicorn
 pydantic
 yt-dlp
 python-dotenv
-spotipy
+langgraph
+langchain-google-genai
+langchain-core
+ddgs
