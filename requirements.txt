@@ -1,6 +1,9 @@
 fastapi
 uvicorn
-pandas
 pydantic
 yt-dlp
-scikit-learn
+python-dotenv
+langgraph
+langchain-google-genai
+langchain-core
+ddgs
