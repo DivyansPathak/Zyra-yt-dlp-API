@@ -6,10 +6,17 @@ from langchain_core.tools import tool
 from langchain_core.messages import HumanMessage, BaseMessage
 from typing import TypedDict, Annotated, Sequence
 
+import os
 import operator
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
+if not GOOGLE_API_KEY:
+    raise RuntimeError("GOOGLE_API_KEY not set!")
 
 # define the state to manage a list of messages
 class AgentState(TypedDict):
