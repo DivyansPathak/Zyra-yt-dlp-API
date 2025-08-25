@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI, HTTPException
 from yt_dlp.utils import DownloadError
 
@@ -27,8 +28,10 @@ async def search_song(query: str):
         raise HTTPException(status_code=400, detail="A search query is required.")
 
     try:
-        raw_youtube_entries = fetch_youtube_data(query)
+        # Run the synchronous, blocking I/O call in a separate thread
+        raw_youtube_entries = await asyncio.to_thread(fetch_youtube_data, query)
 
+        # Parsing is CPU-bound but fast, so it can remain here
         search_results = parse_search_results(raw_youtube_entries)
         
         return search_results
@@ -51,7 +54,8 @@ async def get_stream_url(url: str):
         raise HTTPException(status_code=400, detail="A YouTube video URL is required.")
 
     try:
-        video_info = fetch_stream_data(url)
+        # Run the synchronous, blocking I/O call in a separate thread
+        video_info = await asyncio.to_thread(fetch_stream_data, url)
 
         audio_url = parse_stream_url(video_info)
         
@@ -65,11 +69,14 @@ async def get_stream_url(url: str):
     except Exception:
         raise HTTPException(status_code=500, detail="An internal server error occurred while fetching the stream.")
     
-@app.get("/recommendations")
-def recommend_song(song: str) -> list:
-    
+@app.get("/recommendations", response_model=list)
+async def recommend_song(song: str):
+    """
+    Asynchronously gets song recommendations.
+    """
     try:
-        recommendations = recommender_function(song)
+        # Run the potentially CPU-intensive or I/O-bound function in a thread
+        recommendations = await asyncio.to_thread(recommender_function, song)
         if not recommendations:
             raise HTTPException(status_code=404, detail="Could not find recommendations")
             
@@ -80,17 +87,17 @@ def recommend_song(song: str) -> list:
 
 
 @app.post("/search-songs/", response_model=List[SongSearchResult])
-def search_songs_endpoint(request: SearchRequest):
+async def search_songs_endpoint(request: SearchRequest):
     """
     Accepts a list of song queries and returns a combined list of their metadata from YouTube.
     """
     try:
-        # The main logic is called here
-        results = search_multiple_songs(request.queries)
+        # Run the function that performs multiple I/O operations in a thread
+        results = await asyncio.to_thread(search_multiple_songs, request.queries)
         return results
     except Exception as e:
         # If any error occurs in the yt-dlp process, return a 500 server error
         raise HTTPException(
             status_code=500, 
             detail=f"An internal error occurred: {str(e)}"
-        ) 
+        )

@@ -38,7 +38,6 @@ def fetch_youtube_data(queries: List[str]) -> List[Dict[str, Any]]:
         print(f"An error occurred while fetching from YouTube: {e}")
         raise
         
-    print("Finished fetching all data.")
     return all_entries
 
 def parse_search_results(entries: List[Dict[str, Any]]) -> List[SongSearchResult]:
