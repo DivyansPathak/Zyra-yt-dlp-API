@@ -1,5 +1,6 @@
 import asyncio
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from yt_dlp.utils import DownloadError
 
 from typing import List
@@ -17,6 +18,18 @@ app = FastAPI(
     description="An API for searching, streaming, and getting song recommendations.",
     version="1.3.0",
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"],   
+)
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 @app.get("/search", response_model=List[SongSearchResult])
